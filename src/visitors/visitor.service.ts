@@ -5,6 +5,7 @@ import type { IVisitorRepository, FindAllVisitorParams } from './domain/ports/vi
 import { VisitorRequest } from './domain/entities/VisitorRequest.entity';
 import { CreateVisitorRequestDto } from './infrastructure/dto/create-visitor-request.dto';
 import { UpdateVisitorStatusDto } from './infrastructure/dto/update-visitor-status.dto';
+import { notifyUser } from '../common/notification-client';
 
 interface CurrentUser {
   userId: string;
@@ -69,6 +70,14 @@ export class VisitorService {
       throw new BadRequestException(error.message);
     }
 
-    return this.visitorRepository.save(request);
+    const saved = await this.visitorRepository.save(request);
+
+    void notifyUser(
+      saved.studentId,
+      `Visitor request ${saved.status.toLowerCase()}`,
+      `Your visitor request for ${saved.visitorName} has been ${saved.status.toLowerCase()}.`,
+    );
+
+    return saved;
   }
 }

@@ -33,6 +33,7 @@ export class MaintenanceController {
     @Query('status') status?: string,
     @Query('priority') priority?: string,
     @Query('category') category?: string,
+    @Query('studentId') studentId?: string,
   ) {
     return this.maintenanceService.findAll({
       page: page ? Number(page) : undefined,
@@ -40,6 +41,7 @@ export class MaintenanceController {
       status,
       priority,
       category,
+      studentId,
     });
   }
 

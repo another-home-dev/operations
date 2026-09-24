@@ -5,6 +5,7 @@ import type { IMaintenanceRepository, FindAllParams } from './domain/ports/maint
 import { MaintenanceRequest } from './domain/entities/MaintenanceRequest.entity';
 import { CreateMaintenanceRequestDto } from './infrastructure/dto/create-maintenance-request.dto';
 import { UpdateMaintenanceStatusDto } from './infrastructure/dto/update-maintenance-status.dto';
+import { notifyUser } from '../common/notification-client';
 
 interface CurrentUser {
   userId: string;
@@ -78,6 +79,12 @@ export class MaintenanceService {
       throw new BadRequestException(error.message);
     }
 
-    return this.maintenanceRepository.save(request);
+    const saved = await this.maintenanceRepository.save(request);
+
+    if (saved.status === 'Resolved') {
+      void notifyUser(saved.studentId, 'Maintenance request resolved', `Your request "${saved.title}" has been resolved.`);
+    }
+
+    return saved;
   }
 }

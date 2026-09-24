@@ -45,6 +45,7 @@ export class MaintenanceRepository implements IMaintenanceRepository {
     if (params.status) where.status = params.status;
     if (params.priority) where.priority = params.priority;
     if (params.category) where.category = params.category;
+    if (params.studentId) where.studentId = params.studentId;
 
     const [entities, totalRecords] = await this.typeOrmRepository.findAndCount({
       where,
