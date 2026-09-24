@@ -72,7 +72,11 @@ export class MaintenanceService {
 
       if (dto.status === 'Resolved') {
         request.markAsResolved();
-      } else {
+      } else if (dto.status) {
+        // Only overwrite status when the caller actually sent one — a
+        // request that only sends assignedStaff (see above) must keep the
+        // "In Progress" status that assignStaff() just set, not have it
+        // wiped to undefined by an absent dto.status.
         request.status = dto.status;
       }
     } catch (error) {
