@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { registerWithConsul } from './consul-registration';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(process.env.PORT ?? 4002);
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4002;
+  await app.listen(port);
+  registerWithConsul('operations', port);
 }
 bootstrap();
