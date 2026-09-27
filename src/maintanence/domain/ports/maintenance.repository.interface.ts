@@ -9,6 +9,7 @@ export interface FindAllParams {
   status?: string;
   priority?: string;
   category?: string;
+  studentId?: string;
 }
 
 export interface FindAllResult {
