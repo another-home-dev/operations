@@ -19,6 +19,10 @@ import { HealthController } from './health.controller';
       database: process.env.DB_DATABASE ?? 'operations_service',
       autoLoadEntities: true,
       synchronize: true, // Dev-only — replace with real migrations later.
+      // Default mysql2 pool is 10; raised to handle bursts of concurrent
+      // students. 4 services share one MySQL instance (max_connections: 151
+      // default), so 25 each (100 total) leaves headroom for the rest.
+      extra: { connectionLimit: 25 },
     }),
     MaintenanceModule,
     VisitorsModule,
