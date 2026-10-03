@@ -43,6 +43,13 @@ export class MaintenanceRequestOrmEntity {
   @Column({ type: 'timestamp' })
   submittedDate: Date;
 
+  @Column({ type: 'boolean', default: false })
+  hasImage: boolean;
+
+  // A base64 data URL; excluded from normal queries so list pages stay small.
+  @Column({ type: 'mediumtext', nullable: true, select: false })
+  imageData?: string | null;
+
   // --- Technical Metadata (Only lives in the database) ---
 
   @CreateDateColumn()

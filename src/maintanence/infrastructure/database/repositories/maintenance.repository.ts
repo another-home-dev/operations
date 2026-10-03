@@ -30,6 +30,15 @@ export class MaintenanceRepository implements IMaintenanceRepository {
     return MaintenanceRequestMapper.toDomain(savedEntity);
   }
 
+  async saveImage(id: string, imageData: string): Promise<void> {
+    await this.typeOrmRepository.update({ id }, { imageData, hasImage: true });
+  }
+
+  async findImage(id: string): Promise<string | null> {
+    const row = await this.typeOrmRepository.findOne({ where: { id }, select: { id: true, imageData: true } });
+    return row?.imageData ?? null;
+  }
+
   async findById(id: string): Promise<MaintenanceRequest | null> {
     const ormEntity = await this.typeOrmRepository.findOne({ where: { id } });
     if (!ormEntity) return null;

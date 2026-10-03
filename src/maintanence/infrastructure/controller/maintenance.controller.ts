@@ -34,15 +34,19 @@ export class MaintenanceController {
     @Query('priority') priority?: string,
     @Query('category') category?: string,
     @Query('studentId') studentId?: string,
+    @CurrentUser() user?: { userId: string; roles: string[] },
   ) {
-    return this.maintenanceService.findAll({
-      page: page ? Number(page) : undefined,
-      pageSize: pageSize ? Number(pageSize) : undefined,
-      status,
-      priority,
-      category,
-      studentId,
-    });
+    return this.maintenanceService.findAll(
+      {
+        page: page ? Number(page) : undefined,
+        pageSize: pageSize ? Number(pageSize) : undefined,
+        status,
+        priority,
+        category,
+        studentId,
+      },
+      user,
+    );
   }
 
   @Get('stats')
@@ -50,6 +54,13 @@ export class MaintenanceController {
   @ApiResponse({ status: 200, description: 'Returns total/pending/inProgress/resolved counts.' })
   getStats() {
     return this.maintenanceService.getStats();
+  }
+
+  @Get(':id/image')
+  @ApiOperation({ summary: "Get a maintenance request's attached photo (filer or staff only)" })
+  @ApiResponse({ status: 200, description: 'Returns { imageData } as a base64 data URL.' })
+  async getImage(@Param('id') id: string, @CurrentUser() user: { userId: string; roles: string[] }) {
+    return { imageData: await this.maintenanceService.getImage(id, user) };
   }
 
   @Patch(':id')

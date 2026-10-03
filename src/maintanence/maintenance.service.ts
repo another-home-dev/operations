@@ -12,6 +12,10 @@ interface CurrentUser {
   roles: string[];
 }
 
+const IMAGE_DATA_URL = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+const MAX_IMAGE_CHARS = 4_000_000; // ~3 MB decoded
+const STAFF_ROLES = ['warden', 'staff', 'super-admin'];
+
 @Injectable()
 export class MaintenanceService {
   constructor(
@@ -23,6 +27,10 @@ export class MaintenanceService {
     // studentId comes from the authenticated identity (the wristband), never
     // from the request body — this is what stops someone filing a complaint
     // "as" another student.
+    if (dto.imageData && (dto.imageData.length > MAX_IMAGE_CHARS || !IMAGE_DATA_URL.test(dto.imageData))) {
+      throw new BadRequestException('imageData must be a JPEG, PNG or WebP base64 data URL no larger than ~3 MB.');
+    }
+
     const request = new MaintenanceRequest(
       randomUUID(),
       currentUser.userId,
@@ -34,12 +42,43 @@ export class MaintenanceService {
       'Pending',
       null,
       new Date(),
+      !!dto.imageData,
     );
 
-    return this.maintenanceRepository.save(request);
+    const saved = await this.maintenanceRepository.save(request);
+    if (dto.imageData) {
+      await this.maintenanceRepository.saveImage(saved.id, dto.imageData);
+    }
+    return saved;
   }
 
-  async findAll(params: FindAllParams) {
+  async getImage(id: string, currentUser: CurrentUser): Promise<string> {
+    const request = await this.maintenanceRepository.findById(id);
+    if (!request) {
+      throw new NotFoundException(`Maintenance request ${id} not found`);
+    }
+
+    const isStaff = currentUser.roles.some((role) => STAFF_ROLES.includes(role));
+    if (!isStaff && request.studentId !== currentUser.userId) {
+      throw new ForbiddenException('You are not allowed to view this maintenance request.');
+    }
+
+    const imageData = request.hasImage ? await this.maintenanceRepository.findImage(id) : null;
+    if (!imageData) {
+      throw new NotFoundException('This maintenance request has no image.');
+    }
+    return imageData;
+  }
+
+  async findAll(params: FindAllParams, currentUser?: CurrentUser) {
+    // Staff see everything (and may filter by studentId). Anyone else only ever
+    // sees their own requests: requests are stored under the caller's identity
+    // (the Asgardeo sub in x-user-id), so a client-supplied studentId — e.g. the
+    // accommodation Student.id, a different UUID — would never match anyway.
+    const isStaff = currentUser?.roles.some((role) => STAFF_ROLES.includes(role)) ?? false;
+    if (currentUser && !isStaff) {
+      return this.maintenanceRepository.findAll({ ...params, studentId: currentUser.userId });
+    }
     return this.maintenanceRepository.findAll(params);
   }
 

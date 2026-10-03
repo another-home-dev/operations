@@ -16,6 +16,7 @@ export class MaintenanceRequestMapper {
       raw.status,
       raw.assignedStaff,
       raw.submittedDate,
+      raw.hasImage,
     );
   }
 
@@ -33,6 +34,9 @@ export class MaintenanceRequestMapper {
     ormEntity.status = domain.status;
     ormEntity.assignedStaff = domain.assignedStaff;
     ormEntity.submittedDate = domain.submittedDate;
+    ormEntity.hasImage = domain.hasImage;
+    // imageData is deliberately left unset: save() then leaves the stored image
+    // untouched on status updates. It is written once, via saveImage().
 
     // TypeORM will automatically generate createdAt/updatedAt when this is saved.
 

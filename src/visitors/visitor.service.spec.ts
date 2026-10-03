@@ -23,6 +23,20 @@ describe('VisitorService', () => {
         (notifyUser as jest.Mock).mockClear();
     });
 
+    describe('findAll', () => {
+        it('only returns a student their own visitor requests', async () => {
+            await service.findAll({ page: 1 }, student);
+
+            expect(mockRepo.findAll).toHaveBeenCalledWith({ page: 1, studentId: 'student-1' });
+        });
+
+        it('returns every request to a warden', async () => {
+            await service.findAll({ page: 1 }, warden);
+
+            expect(mockRepo.findAll).toHaveBeenCalledWith({ page: 1 });
+        });
+    });
+
     describe('createRequest', () => {
         it('takes studentId from the authenticated caller, never the request body', async () => {
             mockRepo.save.mockImplementation(async (r) => r);

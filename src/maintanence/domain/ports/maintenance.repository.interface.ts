@@ -32,4 +32,6 @@ export interface IMaintenanceRepository {
   findById(id: string): Promise<MaintenanceRequest | null>;
   findAll(params: FindAllParams): Promise<FindAllResult>;
   findStats(): Promise<MaintenanceStats>;
+  saveImage(id: string, imageData: string): Promise<void>;
+  findImage(id: string): Promise<string | null>;
 }

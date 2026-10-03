@@ -22,4 +22,11 @@ export class CreateMaintenanceRequestDto {
     enum: ['Low', 'Medium', 'High'],
   })
   priority: 'Low' | 'Medium' | 'High';
+
+  @ApiProperty({
+    required: false,
+    example: 'data:image/jpeg;base64,/9j/4AAQ...',
+    description: 'Optional photo of the issue as a base64 data URL (JPEG, PNG or WebP, max ~3 MB)',
+  })
+  imageData?: string;
 }
