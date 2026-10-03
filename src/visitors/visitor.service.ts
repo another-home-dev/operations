@@ -7,6 +7,8 @@ import { CreateVisitorRequestDto } from './infrastructure/dto/create-visitor-req
 import { UpdateVisitorStatusDto } from './infrastructure/dto/update-visitor-status.dto';
 import { notifyUser } from '../common/notification-client';
 
+const STAFF_ROLES = ['warden', 'staff', 'super-admin'];
+
 interface CurrentUser {
   userId: string;
   roles: string[];
@@ -38,7 +40,12 @@ export class VisitorService {
     return this.visitorRepository.save(request);
   }
 
-  async findAll(params: FindAllVisitorParams) {
+  async findAll(params: FindAllVisitorParams, currentUser?: CurrentUser) {
+    // Wardens see every request; a student only ever sees their own (requests
+    // are filed under the caller's x-user-id, see createRequest).
+    if (currentUser && !STAFF_ROLES.some((role) => currentUser.roles.includes(role))) {
+      return this.visitorRepository.findAll({ ...params, studentId: currentUser.userId });
+    }
     return this.visitorRepository.findAll(params);
   }
 

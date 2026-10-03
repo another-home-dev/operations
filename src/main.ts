@@ -1,10 +1,13 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { registerWithConsul } from './consul-registration';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Maintenance requests may carry a base64 photo; Express's default is 100kb.
+  app.useBodyParser('json', { limit: '5mb' });
   app.setGlobalPrefix('operations');   // ← add this line
 
   const config = new DocumentBuilder()

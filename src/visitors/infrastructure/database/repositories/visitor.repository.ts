@@ -36,6 +36,7 @@ export class VisitorRepository implements IVisitorRepository {
 
     const where: Record<string, string> = {};
     if (params.status) where.status = params.status;
+    if (params.studentId) where.studentId = params.studentId;
 
     const [entities, totalRecords] = await this.typeOrmRepository.findAndCount({
       where,

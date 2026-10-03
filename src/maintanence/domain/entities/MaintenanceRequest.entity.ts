@@ -15,6 +15,7 @@ export class MaintenanceRequest {
     public readonly submittedDate: Date,
     // Notice: no createdAt/updatedAt here — those are technical metadata
     // that only the database cares about, same as Accommodation's Room entity.
+    public readonly hasImage: boolean = false,
   ) {}
 
   // Domain logic — the actual business rule lives here, not in a controller

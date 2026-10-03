@@ -31,12 +31,16 @@ export class VisitorController {
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
     @Query('status') status?: string,
+    @CurrentUser() user?: { userId: string; roles: string[] },
   ) {
-    return this.visitorService.findAll({
-      page: page ? Number(page) : undefined,
-      pageSize: pageSize ? Number(pageSize) : undefined,
-      status,
-    });
+    return this.visitorService.findAll(
+      {
+        page: page ? Number(page) : undefined,
+        pageSize: pageSize ? Number(pageSize) : undefined,
+        status,
+      },
+      user,
+    );
   }
 
   @Patch(':id')

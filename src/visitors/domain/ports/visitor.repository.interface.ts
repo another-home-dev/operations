@@ -7,6 +7,7 @@ export interface FindAllVisitorParams {
   page?: number;
   pageSize?: number;
   status?: string;
+  studentId?: string;
 }
 
 export interface FindAllVisitorResult {
